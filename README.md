@@ -11,28 +11,36 @@ It supports PostgreSQL and MySQL.
 Install globally with `npm`
 
 ```
-npm install dbdiff-pg-upgraded -g
+npm install @thalesog/dbdiff -g
 ```
 
 # CLI Usage
 
 ```
-dbdiff-pg-upgraded \
-  -l safe
-  dbdiff-pg-upgraded://user:pass@host[:port]/dbname1 \
-  dbdiff-pg-upgraded://user:pass@host[:port]/dbname2
+dbdiff [options]
 ```
 
-Where `dialect` can be either `postgres` or `mysql`. The first database url denotes the target, the second the source, the sql queries will allow target to be updated to source state.
+## Options
 
-The flag `-l` or `--level` indicates the safety of the SQL. Allowed values are `safe`, `warn` and `drop`
+`-V`, `--version` output the version number
+
+`-s`, `--source <dialect://user:pass@host[:port]/dbname>` source database url
+
+`-d`, `--destination <dialect://user:pass@host[:port]/dbname>` destination database url
+
+Where `dialect` can be either `postgres` or `mysql`.
+
+`-l`, `--level <level>` chooses the safety of the sql (choices: "safe", "warn", "drop",
+default: "safe")
+
+`-h`, `--help` display help for command
 
 # Safety level
 
 Some statements may fail or may produce data loss depending on the data stored in the target database.
 
 - When the `safe` level is specified, only SQL statements that are guaranteed to preserve existing data will be printed. Any other command will be commented out.
-- When the `warn` level is specified also SQL statements that *may* fail because of existing data will be printed. These commands are for example: changes in data types or dropping a `NOT NULL` constraint.
+- When the `warn` level is specified also SQL statements that _may_ fail because of existing data will be printed. These commands are for example: changes in data types or dropping a `NOT NULL` constraint.
 - When the `drop` level is specified all SQL statements are printed and this may contain `DROP COLUMN` or `DROP TABLE` statements.
 
 Dropping a sequence or dropping an index is considered safe.
@@ -53,46 +61,45 @@ ALTER TABLE table_name
   ALTER column_name TYPE data_type USING column_name::integer
 ```
 
-# Usage as a library
+# Usage as a library - NEEDS TESTING
 
 You can use `dbdiff-pg-upgraded` as a library:
 
 ```javascript
-var dbdiff = require('dbdiff-pg-upgraded')
+var dbdiff = require('dbdiff-pg-upgraded');
 
-dbdiff.describeDatabase(connString)
-  .then((schema) => {
-    // schema is a JSON-serializable object representing the database structure
-  })
+dbdiff.describeDatabase(connString).then(schema => {
+  // schema is a JSON-serializable object representing the database structure
+});
 
-var diff = new dbdiff.DbDiff()
+var diff = new dbdiff.DbDiff();
 // Compare two databases passing the connection strings
-diff.compare(conn1, conn2)
-  .then(() => {
-    console.log(diff.commands('drop'))
-  })
+diff.compare(conn1, conn2).then(() => {
+  console.log(diff.commands('drop'));
+});
 
 // Compare two schemas
-diff.compareSchemas(schema1, schema2)
-console.log(diff.commands('drop'))
+diff.compareSchemas(schema1, schema2);
+console.log(diff.commands('drop'));
 ```
 
 You can pass connection strings such as `postgres://user:pass@host:5432/dbname1` or objects to these methods. For example:
 
 ```javascript
-dbdiff.describeDatabase({
-  dialect: 'postgres', // use `mysql` for mysql
-  username: 'user',
-  password: 'pass',
-  database: 'dbname1',
-  host: 'localhost',
-  dialectOptions: {
-    ssl: false
-  }
-})
-.then((schema) => {
-  // ...
-})
+dbdiff
+  .describeDatabase({
+    dialect: 'postgres', // use `mysql` for mysql
+    username: 'user',
+    password: 'pass',
+    database: 'dbname1',
+    host: 'localhost',
+    dialectOptions: {
+      ssl: false,
+    },
+  })
+  .then(schema => {
+    // ...
+  });
 ```
 
 # Example of `.describeDatabase()` output
@@ -109,17 +116,13 @@ dbdiff.describeDatabase({
           "name": "email_unique",
           "schema": "public",
           "type": "unique",
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         },
         {
           "name": "users_pk",
           "schema": "public",
           "type": "primary",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       ],
       "columns": [
@@ -146,13 +149,9 @@ dbdiff.describeDatabase({
           "name": "items_fk",
           "schema": "public",
           "type": "foreign",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "referenced_table": "users",
-          "referenced_columns": [
-            "id"
-          ]
+          "referenced_columns": ["id"]
         }
       ],
       "columns": [

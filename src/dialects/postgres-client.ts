@@ -1,15 +1,20 @@
-const { Pool } = require('pg');
-const parseDbUrl = require('parse-database-url');
+import { Pool, PoolConfig } from 'pg';
+import parseDbUrl from 'parse-database-url';
+
 const DROP_SCHEMA_QUERY = 'drop schema public cascade; create schema public;';
-class PostgresClient {
-  constructor(connOptions) {
-    this.connconnOptions = connOptions;
+
+export default class PostgresClient {
+  private pool: Pool | undefined;
+  private connUrl: string;
+  private connOptions: PoolConfig;
+
+  constructor(conUrl: string) {
+    this.connUrl = conUrl;
+    this.connOptions = parseDbUrl(this.connUrl);
   }
 
   buildPool() {
-    const dbConfig = parseDbUrl(this.connconnOptions);
-    this.pool = new Pool(dbConfig);
-    return this.pool;
+    return new Pool(this.connOptions);
   }
 
   dropTables() {
@@ -18,10 +23,7 @@ class PostgresClient {
 
   async connect() {
     if (!this.pool) {
-      this.buildPool();
-      const pgClient = await this.pool.connect();
-
-      return pgClient;
+      this.pool = this.buildPool();
     }
     const pgClient = await this.pool.connect();
 
@@ -37,11 +39,9 @@ class PostgresClient {
   }
 
   find(sql, params) {
-    return this.query(sql, params).then((result) => result.rows);
+    return this.query(sql, params).then(result => result.rows);
   }
   findOne(sql, params) {
-    return this.query(sql, params).then((result) => result.rows[0]);
+    return this.query(sql, params).then(result => result.rows[0]);
   }
 }
-
-module.exports = PostgresClient;

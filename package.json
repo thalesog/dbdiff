@@ -18,6 +18,7 @@
   "dependencies": {
     "dedent": "^0.7.0",
     "mysql": "^2.10.2",
+    "parse-database-url": "^0.3.0",
     "pg": "^8.4.0",
     "pync": "^1.0.3",
     "underscore": "^1.11.0",

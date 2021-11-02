@@ -1,12 +1,14 @@
-const { Pool } = require("pg");
-const DROP_SCHEMA_QUERY = "drop schema public cascade; create schema public;";
+const { Pool } = require('pg');
+const parseDbUrl = require('parse-database-url');
+const DROP_SCHEMA_QUERY = 'drop schema public cascade; create schema public;';
 class PostgresClient {
   constructor(connOptions) {
     this.connconnOptions = connOptions;
   }
 
   buildPool() {
-    this.pool = new Pool(this.connconnOptions);
+    const dbConfig = parseDbUrl(this.connconnOptions);
+    this.pool = new Pool(dbConfig);
     return this.pool;
   }
 
@@ -18,11 +20,11 @@ class PostgresClient {
     if (!this.pool) {
       this.buildPool();
       const pgClient = await this.pool.connect();
-      
+
       return pgClient;
     }
     const pgClient = await this.pool.connect();
-    
+
     return pgClient;
   }
 

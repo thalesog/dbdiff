@@ -10,9 +10,9 @@ type MysqlConnOptions = {
   database: string;
 };
 export class MysqlClient {
-  private connection: Connection;
   private options: MysqlConnOptions;
-  private database: string;
+  public connection: Connection;
+  public database: string;
 
   constructor(dbUrl: string) {
     const options = parseDbUrl(dbUrl);

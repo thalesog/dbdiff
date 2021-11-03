@@ -77,13 +77,16 @@ function handleTestFailure(
   result: Record<string, any>,
   args: string[] | undefined
 ) {
-  if (!options.expectedFailure && result.code !== 0) {
-    console.log(`Running ${cmd} command failed for unexpected reason. Here's more info:
-${chalk.bold('cmd:')}     ${cmd}
-${chalk.bold('options:')} ${JSON.stringify(options)}
-${chalk.bold('args:')}    ${(args || []).join(' ')}
-${chalk.bold('stderr:')}  ${result.stderr}
-${chalk.bold('stdout:')}  ${result.stdout}
-${chalk.bold('code:')}    ${result.code}`);
+  if (!options.expectedFailure && result.exitCode !== 0) {
+    console.log(`
+    Running ${cmd} command failed for unexpected reason. Here's more info:
+    ${chalk.bold('cmd:')}     ${cmd}
+    ${chalk.bold('result:')}  ${JSON.stringify(result)}
+    ${chalk.bold('options:')} ${JSON.stringify(options)}
+    ${chalk.bold('args:')}    ${(args || []).join(' ')}
+    ${chalk.bold('stderr:')}  ${result.stderr}
+    ${chalk.bold('stdout:')}  ${result.stdout}
+    ${chalk.bold('code:')}    ${result.exitCode}
+    `);
   }
 }

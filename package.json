@@ -51,16 +51,12 @@
   "homepage": "https://github.com/thalesog/dbdiff#readme",
   "dependencies": {
     "commander": "^7.2.0",
-    "dedent": "^0.7.0",
     "mysql2": "^2.3.2",
     "parse-database-url": "^0.3.0",
     "pg": "^8.7.1",
-    "pync": "^1.0.3",
-    "querystring": "^0.2.1",
     "underscore": "^1.13.1"
   },
   "devDependencies": {
-    "@types/dedent": "^0.7.0",
     "@types/jest": "^26.0.24",
     "@types/node": "^12.20.11",
     "@types/pg": "^8.6.1",
@@ -95,7 +91,7 @@
   },
   "release": {
     "branches": [
-      "main"
+      "master"
     ]
   }
 }

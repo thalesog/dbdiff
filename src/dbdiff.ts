@@ -1,5 +1,4 @@
 import _ from 'underscore';
-import dedent from 'dedent';
 import * as util from 'util';
 import { describeDatabase } from './dialects';
 
@@ -102,12 +101,12 @@ export default class DbDiff {
         return;
       }
       if (col1.type !== col2.type) {
-        this._warn(dedent`
-          -- Previous data type was ${col1.type}
-          ALTER TABLE ${tableName} ALTER COLUMN ${this._quote(
-          columnName
-        )} SET DATA TYPE ${col2.type};
-        `);
+        this._warn(`-- Previous data type was ${col1.type}`);
+        this._warn(
+          `ALTER TABLE ${tableName} ALTER COLUMN ${this._quote(
+            columnName
+          )} SET DATA TYPE ${col2.type};`
+        );
       }
       if (col1.nullable !== col2.nullable) {
         if (col2.nullable) {

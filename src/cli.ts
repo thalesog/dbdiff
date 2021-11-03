@@ -26,13 +26,13 @@ console.log(`Source => ${source}`);
 console.log(`Destination => ${destination}`);
 console.log(`Level => ${level}`);
 
-dbdiff
-  .compare(source, destination)
-  .then(() => {
+async function main() {
+  try {
+    await dbdiff.compare(source, destination);
     console.log(dbdiff.commands(level));
-  })
-  .catch(err => {
-    console.error(err.stack);
-  });
+  } catch (error) {
+    console.error(error);
+  }
+}
 
-// Function code for CLI goes here
+void main();

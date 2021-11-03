@@ -5,10 +5,10 @@ import { describeDatabase } from './dialects';
 
 type SqlType = {
   sql: string;
-  level: Level;
+  level: LogLevel;
 };
 
-enum Level {
+export enum LogLevel {
   COMMENT,
   SAFE,
   WARN,
@@ -24,24 +24,24 @@ export default class DbDiff {
     postgres: '"',
   };
 
-  _log(sql: string, level: Level) {
+  _log(sql: string, level: LogLevel) {
     this.sql.push({ sql, level });
   }
 
   _drop(sql): void {
-    this._log(sql, Level.DROP);
+    this._log(sql, LogLevel.DROP);
   }
 
   _warn(sql) {
-    this._log(sql, Level.WARN);
+    this._log(sql, LogLevel.WARN);
   }
 
   _safe(sql) {
-    this._log(sql, Level.SAFE);
+    this._log(sql, LogLevel.SAFE);
   }
 
   _comment(sql) {
-    this._log(sql, Level.COMMENT);
+    this._log(sql, LogLevel.COMMENT);
   }
 
   _quote(name) {
@@ -258,7 +258,7 @@ export default class DbDiff {
         const keys = constraint2.columns
           .map(s => `${this._quote(s)}`)
           .join(', ');
-        const logLevel = table1 ? Level.WARN : Level.SAFE;
+        const logLevel = table1 ? LogLevel.WARN : LogLevel.SAFE;
         let fullName = this._quote(constraint2.name);
         if (constraint2.type === 'primary') {
           if (this.selectedDialect === 'mysql') fullName = 'foo';

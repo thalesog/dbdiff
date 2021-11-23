@@ -5,11 +5,6 @@ import url from 'url';
 import PostgresDialect from './postgres';
 import MysqlDialect from './mysql';
 
-const dialects = {
-  postgres: PostgresDialect,
-  mysql: MysqlDialect,
-};
-
 export async function describeDatabase(options) {
   let dialect = options.dialect;
   if (!dialect) {
@@ -24,10 +19,13 @@ export async function describeDatabase(options) {
       throw new Error(`Dialect not found for options ${options}`);
     }
   }
-  const clazz = dialects[dialect];
-  if (!clazz) {
-    throw new Error(`No implementation found for dialect ${dialect}`);
+
+  switch (dialect) {
+    case 'mysql':
+      return new MysqlDialect().describeDatabase(options);
+    case 'postgres':
+      return new PostgresqlDialect().describeDatabase(options);
+    default:
+      throw new Error(`No implementation found for dialect ${dialect}`);
   }
-  const obj = new (Function.prototype.bind.apply(clazz, [options]))();
-  return obj.describeDatabase(options);
 }

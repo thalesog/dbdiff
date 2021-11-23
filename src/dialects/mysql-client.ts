@@ -1,54 +1,52 @@
-import { createConnection, Connection } from 'mysql2/promise';
-const connections = {};
+import { createConnection, Connection, RowDataPacket } from 'mysql2/promise';
 import parseDbUrl from 'parse-database-url';
 
-type MysqlConnOptions = {
-  driver: 'mysql';
-  user: string;
-  password: string;
-  host: string;
-  database: string;
-};
-export class MysqlClient {
-  private options: MysqlConnOptions;
-  public connection: Connection;
+export default class MysqlClient {
+  private connection?: Connection;
   public database: string;
+  private dbUrl: string;
 
   constructor(dbUrl: string) {
     const options = parseDbUrl(dbUrl);
-    this.options = options;
+    this.dbUrl = dbUrl;
     this.database = options.database;
-
-    const key = `${options.username}:${options.password}@${options.host}:${options.port}/${options.database}`;
-    let conn = connections[key];
-    if (!conn) {
-      conn = connections[key] = createConnection(dbUrl);
-    }
-    this.connection = conn;
   }
 
-  dropTables() {
-    return this.find(
+  async getConnection() {
+    return !this.connection
+      ? await createConnection(this.dbUrl)
+      : this.connection;
+  }
+
+  async dropTables() {
+    const connection = await this.getConnection();
+
+    const results = await this.find(
       `
       SELECT concat('DROP TABLE IF EXISTS ', table_name, ';') AS fullSQL
       FROM information_schema.tables
       WHERE table_schema = ?;
     `,
-      [this.options.database]
-    ).then((results: any) => {
-      const sql = results.map(result => result.fullSQL).join(' ');
-      return sql && this.connection.query(sql);
-    });
+      [this.database]
+    );
+    if (!results) throw new Error('Table list not found');
+    const sqlResults = results.map(result => result.fullSQL).join(' ');
+    return sqlResults && connection.query(sqlResults);
   }
 
-  async find(sql, params: string[] = []) {
-    const query = await this.connection.query(sql, params);
+  async find(sql: string, params: string[] = []) {
+    const connection = await this.getConnection();
 
-    return query[0];
+    const query = await connection.query(sql, params);
+
+    if (!query[0]) throw new Error('Query failed');
+
+    return query[0] as RowDataPacket[];
   }
 
   async findOne(sql, params = []) {
-    const query = await this.connection.query(sql, params);
+    const connection = await this.getConnection();
+    const query = await connection.query(sql, params);
 
     return query[0][0];
   }

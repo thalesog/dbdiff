@@ -1,37 +1,39 @@
-import { MysqlClient } from './mysql-client';
+import MysqlClient from './mysql-client';
 
-export class MySQLDialect {
+export default class MySQLDialect {
   _quote(str: any) {
     return `\`${str}\``;
   }
 
   async describeDatabase(options) {
-    const schema = { dialect: 'mysql', sequences: [], tables: [] };
+    const schema = { dialect: 'mysql', sequences: [], tables: [] as any[] };
     const client = new MysqlClient(options);
-    const [rows, fields] = await client.connection.query('SHOW TABLES');
+    const clientConnection = await client.getConnection();
+    const [rows, fields] = await clientConnection.query('SHOW TABLES');
     const field = fields[0].name;
     const tables = (rows as any).map(row => row[field]);
-    const tables_1 = tables.map(table => {
+    for await (const table of tables) {
       const t = {
         name: table,
         constraints: [],
         indexes: [],
         columns: [],
       };
-      return client
-        .find(`DESCRIBE ${this._quote(table)}`)
-        .then((columns: any) => {
-          t.columns = columns.map(column => ({
-            name: column.Field,
-            nullable: column.Null === 'YES',
-            default_value: column.Default,
-            type: column.Type,
-            extra: column.Extra,
-          }));
-          return t;
-        });
-    });
-    schema.tables = tables_1;
+      schema.tables.push(
+        await client
+          .find(`DESCRIBE ${this._quote(table)}`)
+          .then((columns: any) => {
+            t.columns = columns.map(column => ({
+              name: column.Field,
+              nullable: column.Null === 'YES',
+              default_value: column.Default,
+              type: column.Type,
+              extra: column.Extra,
+            }));
+            return t;
+          })
+      );
+    }
     const constraints: any = await client.find(
       'SELECT * FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA=?',
       [client.database]

@@ -1,6 +1,3 @@
-/* eslint-disable */
-// @ts-nocheck
-
 import url from 'url';
 import PostgresDialect from './postgres';
 import MysqlDialect from './mysql';
@@ -24,7 +21,7 @@ export async function describeDatabase(options) {
     case 'mysql':
       return new MysqlDialect().describeDatabase(options);
     case 'postgres':
-      return new PostgresqlDialect().describeDatabase(options);
+      return new PostgresDialect().describeDatabase(options);
     default:
       throw new Error(`No implementation found for dialect ${dialect}`);
   }

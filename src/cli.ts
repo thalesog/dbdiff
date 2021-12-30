@@ -28,11 +28,13 @@ void (async () => {
 ----------------------------------
 ➡️ Level => ${level}
 ----------------------------------
-➡️ Source
-${JSON.stringify(parseDbUrl(source), null, 2)}
+➡️ Source`);
+  console.log(parseDbUrl(source));
+  console.log(`
 ➡️ Destination
-${JSON.stringify(parseDbUrl(destination), null, 2)}
     `);
+  console.log(parseDbUrl(destination));
+
   process.exitCode = 0;
   try {
     await dbdiff.compare(source, destination);
